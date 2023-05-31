@@ -2,6 +2,7 @@ package com.ho8278.partyview
 
 import android.graphics.*
 import android.graphics.drawable.Drawable
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.withTranslation
 import kotlin.math.max
 import kotlin.math.min
@@ -9,8 +10,8 @@ import kotlin.random.Random
 
 class Particle(
     private val drawable: Drawable,
-    private val maxWidth: Int,
     private val minWidth: Int,
+    private val maxWidth: Int,
 ) {
 
     private val pathMeasure = PathMeasure()
@@ -28,6 +29,8 @@ class Particle(
     private var quadX = 0
     private var quadY = 0
 
+    private var isAnimationDone = true
+
     init {
         drawable.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
     }
@@ -37,7 +40,7 @@ class Particle(
 
         path.moveTo(startX.toFloat(), startY.toFloat())
 
-        var endX = 0
+        var endX: Int
         val minStart = startX - minWidth / 2
         val minEnd = startX - maxWidth / 2
 
@@ -61,14 +64,17 @@ class Particle(
         pathMeasure.getPosTan(distance, position, null)
         positionX = position[0]
         positionY = position[1]
+
+        isAnimationDone = progress == 1f
     }
 
     fun draw(canvas: Canvas) {
+        if(isAnimationDone) return
         canvas.withTranslation(positionX, positionY) {
             drawable.draw(this)
         }
-        canvas.drawPath(path, paint)
-
-        canvas.drawPoint(quadX.toFloat(), quadY.toFloat(), paint)
+//        canvas.drawPath(path, paint)
+//
+//        canvas.drawPoint(quadX.toFloat(), quadY.toFloat(), paint)
     }
 }
