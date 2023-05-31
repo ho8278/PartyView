@@ -33,13 +33,14 @@ class PartyView @JvmOverloads constructor(
         icon = AppCompatResources.getDrawable(context, R.drawable.icon)!!
     }
 
-    val particle = Particle(icon, 300, 100)
     var touchPoint = intArrayOf(-1, -1)
 
-    fun start() {
+    val particlePool = MutableList(20) { Particle(icon, 300, 900) }
+
+    private fun start() {
         val animator = ValueAnimator.ofFloat(0f, 1f).apply {
-            addUpdateListener {
-                particle.onProgress(it.animatedFraction)
+            addUpdateListener { valueAnimator ->
+                particlePool.forEach { it.onProgress(valueAnimator.animatedFraction) }
                 invalidate()
             }
             duration = 500L
@@ -50,8 +51,9 @@ class PartyView @JvmOverloads constructor(
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         if (event?.action == MotionEvent.ACTION_DOWN) {
-            Log.d("AAA", "????????")
-            particle.setPath(event.x.toInt(), event.y.toInt())
+            particlePool.forEach {
+                it.setPath(event.x.toInt(), event.y.toInt())
+            }
             touchPoint[0] = event.x.toInt()
             touchPoint[1] = event.y.toInt()
             start()
@@ -62,16 +64,6 @@ class PartyView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-        canvas?.let { particle.draw(it) }
-
-        //draw max rect
-        if(touchPoint[0] >= 0 && touchPoint[1] >= 0) {
-            canvas?.withTranslation(touchPoint[0] - 150f,touchPoint[1] - 150f) {
-                drawRect(0f,0f,300f,300f, maxPaint)
-            }
-            canvas?.withTranslation(touchPoint[0] - 50f, touchPoint [1] - 50f) {
-                drawRect(0f,0f,100f,100f, minPaint)
-            }
-        }
+        canvas?.let { canvas -> particlePool.forEach { it.draw(canvas) } }
     }
 }
